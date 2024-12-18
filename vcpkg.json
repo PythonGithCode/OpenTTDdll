@@ -6,10 +6,9 @@
       "platform": "!(windows & arm)"
     },
     {
-      "name": "curl",
-      "platform": "linux",
+      "name": "curl",  # Removed platform restriction for curl to allow it to be used on Windows
       "features": [
-        "http2"
+        "http2"  # Optional: only include if needed for your project
       ]
     },
     {
