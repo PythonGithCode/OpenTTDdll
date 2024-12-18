@@ -18,9 +18,7 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Debug)
 endif()
 
-if (EMSCRIPTEN)
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/os/emscripten/cmake")
-endif()
+
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
 set(CMAKE_OSX_DEPLOYMENT_TARGET 10.15)
@@ -57,13 +55,7 @@ add_endian_definition()
 include(CompileFlags)
 compile_flags()
 
-if(APPLE OR UNIX)
-    add_definitions(-DUNIX)
-endif()
 
-if(UNIX)
-    find_package(Doxygen)
-endif()
 
 list(APPEND GENERATED_SOURCE_FILES "${CMAKE_BINARY_DIR}/generated/rev.cpp")
 if(WIN32)
@@ -83,22 +75,6 @@ add_custom_target(find_version
         BYPRODUCTS ${GENERATED_SOURCE_FILES}
 )
 
-# Documentation
-if(DOXYGEN_EXECUTABLE)
-    add_custom_target(docs)
-    add_custom_target(docs_source
-        ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/docs
-        COMMAND ${DOXYGEN_EXECUTABLE} ${CMAKE_BINARY_DIR}/Doxyfile
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Generating documentation for source"
-    )
-    add_dependencies(docs_source
-        find_version
-    )
-    add_dependencies(docs
-        docs_source
-    )
-endif()
 
 include(AddCustomXXXTimestamp)
 
@@ -139,33 +115,7 @@ if(NOT EMSCRIPTEN)
 endif()
 
 if(NOT OPTION_DEDICATED)
-    if(NOT WIN32)
-        find_package(Allegro)
-        if(NOT APPLE)
-            find_package(Freetype)
-            find_package(SDL2)
-            if(NOT SDL2_FOUND)
-                find_package(SDL)
-            endif()
-            find_package(Fluidsynth)
-            if(Freetype_FOUND)
-                find_package(Fontconfig)
-            endif()
-            find_package(Harfbuzz)
-            find_package(ICU OPTIONAL_COMPONENTS i18n uc)
-        endif()
-    endif()
     find_package(OpusFile)
-endif()
-if(APPLE)
-    enable_language(OBJCXX)
-
-    find_package(Iconv)
-
-    find_library(AUDIOTOOLBOX_LIBRARY AudioToolbox)
-    find_library(AUDIOUNIT_LIBRARY AudioUnit)
-    find_library(COCOA_LIBRARY Cocoa)
-    find_library(QUARTZCORE_LIBRARY QuartzCore)
 endif()
 
 if(NOT EMSCRIPTEN AND NOT OPTION_DEDICATED)
@@ -186,31 +136,7 @@ check_ipo_supported(RESULT IPO_FOUND)
 
 show_options()
 
-if(UNIX AND NOT APPLE AND NOT OPTION_DEDICATED)
-    if(NOT SDL_FOUND AND NOT SDL2_FOUND AND NOT ALLEGRO_FOUND)
-        message(FATAL_ERROR "SDL, SDL2 or Allegro is required for this platform")
-    endif()
-    if(HARFBUZZ_FOUND AND NOT ICU_i18n_FOUND)
-        message(WARNING "HarfBuzz depends on ICU i18n to function; HarfBuzz will be disabled")
-    endif()
-    if(NOT HARFBUZZ_FOUND)
-        message(WARNING "Without HarfBuzz and ICU i18n the game will not be able to render right-to-left languages correctly")
-    endif()
-endif()
-if(APPLE)
-    if(NOT AUDIOTOOLBOX_LIBRARY)
-        message(FATAL_ERROR "AudioToolbox is required for this platform")
-    endif()
-    if(NOT AUDIOUNIT_LIBRARY)
-        message(FATAL_ERROR "AudioUnit is required for this platform")
-    endif()
-    if(NOT COCOA_LIBRARY)
-        message(FATAL_ERROR "Cocoa is required for this platform")
-    endif()
-    if(NOT QUARTZCORE_LIBRARY)
-        message(FATAL_ERROR "QuartzCore is required for this platform")
-    endif()
-endif()
+
 
 if(OPTION_PACKAGE_DEPENDENCIES)
     if(NOT UNIX)
@@ -314,14 +240,8 @@ link_package(ZLIB TARGET ZLIB::ZLIB ENCOURAGED)
 link_package(LIBLZMA TARGET LibLZMA::LibLZMA ENCOURAGED)
 link_package(LZO)
 
-if(NOT WIN32 AND NOT EMSCRIPTEN)
-    link_package(CURL ENCOURAGED)
-    target_link_libraries(openttd_lib ${CMAKE_DL_LIBS})
-endif()
 
-if(NOT EMSCRIPTEN)
-    link_package(unofficial-breakpad TARGET unofficial::breakpad::libbreakpad_client ENCOURAGED)
-endif()
+
 
 if(NOT OPTION_DEDICATED)
     link_package(Fluidsynth)
@@ -348,73 +268,8 @@ endif()
 
 include(3rdparty/llvm/CheckAtomic)
 
-if(APPLE)
-    link_package(Iconv TARGET Iconv::Iconv)
 
-    target_link_libraries(openttd_lib
-        ${AUDIOTOOLBOX_LIBRARY}
-        ${AUDIOUNIT_LIBRARY}
-        ${COCOA_LIBRARY}
-        ${QUARTZCORE_LIBRARY}
-    )
 
-    add_definitions(
-        -DWITH_COCOA
-    )
-endif()
-
-if(EMSCRIPTEN)
-    add_library(WASM::WASM INTERFACE IMPORTED)
-
-    # Allow heap-growth, and start with a bigger memory size.
-    target_link_libraries(WASM::WASM INTERFACE "-s ALLOW_MEMORY_GROWTH=1")
-    target_link_libraries(WASM::WASM INTERFACE "-s INITIAL_MEMORY=33554432")
-    target_link_libraries(WASM::WASM INTERFACE "-s DISABLE_EXCEPTION_CATCHING=0")
-    target_link_libraries(WASM::WASM INTERFACE "-s WASM_BIGINT")
-    add_definitions(-s DISABLE_EXCEPTION_CATCHING=0)
-
-    # Export functions to Javascript.
-    target_link_libraries(WASM::WASM INTERFACE "-s EXPORTED_FUNCTIONS='[\"_main\", \"_em_openttd_add_server\"]' -s EXPORTED_RUNTIME_METHODS='[\"cwrap\"]'")
-
-    # Preload all the files we generate during build.
-    # As we do not compile with FreeType / FontConfig, we also have no way to
-    # render several languages (like Chinese, ..), so where do you draw the
-    # line what languages to include and which not? In the end, especially as
-    # the more languages you add the slower downloading becomes, we decided to
-    # only ship the English language.
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_BINARY_DIR}/baseset@/baseset")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_BINARY_DIR}/lang/english.lng@/lang/english.lng")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/bin/ai@/ai")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/bin/game@/game")
-    # Documentation files for the in-game text file viewer
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/README.md@/README.md")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/CREDITS.md@/CREDITS.md")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/CONTRIBUTING.md@/CONTRIBUTING.md")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/COPYING.md@/COPYING.md")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/known-bugs.md@/known-bugs.md")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/changelog.md@/changelog.md")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/docs/admin_network.md@/docs/admin_network.md")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/docs/debugging_desyncs.md@/docs/debugging_desyncs.md")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/docs/desync.md@/docs/desync.md")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/docs/directory_structure.md@/docs/directory_structure.md")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/docs/eints.md@/docs/eints.md")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/docs/linkgraph.md@/docs/linkgraph.md")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/docs/logging_and_performance_metrics.md@/docs/logging_and_performance_metrics.md")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/docs/multiplayer.md@/docs/multiplayer.md")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/docs/savegame_format.md@/docs/savegame_format.md")
-    target_link_libraries(WASM::WASM INTERFACE "--preload-file ${CMAKE_SOURCE_DIR}/docs/symbol_server.md@/docs/symbol_server.md")
-
-    # We use IDBFS for persistent storage.
-    target_link_libraries(WASM::WASM INTERFACE "-lidbfs.js")
-
-    # Use custom pre-js and shell.html.
-    target_link_libraries(WASM::WASM INTERFACE "--pre-js ${CMAKE_SOURCE_DIR}/os/emscripten/pre.js")
-    target_link_libraries(WASM::WASM INTERFACE "--shell-file ${CMAKE_SOURCE_DIR}/os/emscripten/shell.html")
-
-    # Build the .html (which builds the .js, .wasm, and .data too).
-    set_target_properties(openttd PROPERTIES SUFFIX ".html")
-    target_link_libraries(openttd WASM::WASM)
-endif()
 
 if(NOT PERSONAL_DIR STREQUAL "(not set)")
     add_definitions(
