@@ -58,6 +58,17 @@ find_package(PNG REQUIRED)
 # Optional Windows packages
 find_package(CURL REQUIRED)
 
+
+list(APPEND GENERATED_SOURCE_FILES "${CMAKE_BINARY_DIR}/generated/rev.cpp")
+if(WIN32)
+    list(APPEND GENERATED_SOURCE_FILES "${CMAKE_BINARY_DIR}/generated/ottdres.rc")
+endif()
+
+
+
+add_library(openttd_lib OBJECT ${GENERATED_SOURCE_FILES})
+
+
 if(WIN32)
     # Add necessary Windows libraries
     target_link_libraries(openttd_lib
