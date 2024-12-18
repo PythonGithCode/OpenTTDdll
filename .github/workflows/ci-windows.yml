@@ -70,12 +70,23 @@ jobs:
           -GNinja \
           -DVCPKG_TARGET_TRIPLET=${{ inputs.arch }}-windows-static \
           -DCMAKE_TOOLCHAIN_FILE="${{ runner.temp }}\vcpkg\scripts\buildsystems\vcpkg.cmake" \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=YES \
+          -DBUILD_SHARED_LIBS=ON  # Ensure we're building a shared library (DLL)
           # EOF
         echo "::endgroup::"
 
         echo "::group::Build"
-        cmake --build .
+        cmake --build . --config Release
         echo "::endgroup::"
+
+
+    - name: Upload DLL as artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: my-dll-artifact
+        path: build/*.dll  # Adjust the path to match where your DLL is located (it may differ depending on your CMake configuration)
+
 
     - name: Test
       shell: bash
