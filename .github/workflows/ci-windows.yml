@@ -35,7 +35,7 @@ jobs:
 
     - name: Install dependencies using vcpkg
       run: |
-        ${{ runner.temp }}\vcpkg\vcpkg install curl  # Ensure CURL is installed
+        ${{ runner.temp }}\vcpkg\vcpkg install  # Install all dependencies from vcpkg.json
 
     - name: Install OpenGFX
       shell: bash
