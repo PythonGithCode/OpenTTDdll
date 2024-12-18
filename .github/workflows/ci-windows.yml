@@ -33,10 +33,6 @@ jobs:
         git clone https://github.com/microsoft/vcpkg ${{ runner.temp }}\vcpkg
         ${{ runner.temp }}\vcpkg\bootstrap-vcpkg.bat -disableMetrics
 
-    - name: Install dependencies using vcpkg
-      run: |
-        ${{ runner.temp }}\vcpkg\vcpkg install  # Install all dependencies from vcpkg.json
-
     - name: Install OpenGFX
       shell: bash
       run: |
@@ -74,20 +70,12 @@ jobs:
           -GNinja \
           -DVCPKG_TARGET_TRIPLET=${{ inputs.arch }}-windows-static \
           -DCMAKE_TOOLCHAIN_FILE="${{ runner.temp }}\vcpkg\scripts\buildsystems\vcpkg.cmake" \
-          -DCMAKE_WINDOWS_EXPORT_ALL_SYMBOLS=YES \  # Add this to export all DLL symbols
-          -DCMAKE_BUILD_TYPE=Release \
-          -DBUILD_SHARED_LIBS=ON  # Ensure we're building a shared library (DLL)
+          # EOF
         echo "::endgroup::"
 
         echo "::group::Build"
-        cmake --build . --config Release  # Use Release configuration to build the DLL
+        cmake --build .
         echo "::endgroup::"
-
-    - name: Upload DLL as artifact
-      uses: actions/upload-artifact@v3
-      with:
-        name: my-dll-artifact
-        path: build/*.dll  # Adjust the path to match where your DLL is located (it may differ depending on your CMake configuration)
 
     - name: Test
       shell: bash
