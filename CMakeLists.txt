@@ -26,11 +26,10 @@ if(WIN32)
         -DWITH_UNISCRIBE
         -DPSAPI_VERSION=1
     )
-
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS YES)  # Export all symbols automatically
 endif()
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake" "${CMAKE_SOURCE_DIR}/os/emscripten/cmake")
 include(GNUInstallDirs)
 
 include(Options)
@@ -58,16 +57,12 @@ find_package(PNG REQUIRED)
 # Optional Windows packages
 find_package(CURL REQUIRED)
 
-
 list(APPEND GENERATED_SOURCE_FILES "${CMAKE_BINARY_DIR}/generated/rev.cpp")
 if(WIN32)
     list(APPEND GENERATED_SOURCE_FILES "${CMAKE_BINARY_DIR}/generated/ottdres.rc")
 endif()
 
-
-
 add_library(openttd_lib OBJECT ${GENERATED_SOURCE_FILES})
-
 
 if(WIN32)
     # Add necessary Windows libraries
@@ -108,12 +103,6 @@ add_library(openttd SHARED ${GENERATED_SOURCE_FILES} src/*.cpp)
 # Ensure functions are exported properly for rundll32
 target_compile_definitions(openttd PUBLIC EXPORT_OPENTTD)
 
-# Make sure we export the functions needed for rundll32
-target_sources(openttd
-    PRIVATE
-    ${CMAKE_SOURCE_DIR}/src/main.cpp  # Your entry point (if it exists)
-)
-
 # Set up the necessary precompiled headers for optimization
 target_precompile_headers(openttd
     PRIVATE
@@ -123,26 +112,16 @@ target_precompile_headers(openttd
 
 # Link the libraries required by OpenTTD (such as ZLIB, PNG, etc.)
 target_link_libraries(openttd
+    openttd_lib
     ZLIB::ZLIB
     LibLZMA::LibLZMA
-    LZO
+    LZO::LZO
     PNG::PNG
-    CURL::CURL
 )
 
-# Set the output name for the DLL (optional)
-set_target_properties(openttd PROPERTIES OUTPUT_NAME "openttd_dll")
-
-# Ensure tests and dependencies are linked properly
-enable_testing()
-
-# If you want to add tests or other components, you can add them here:
-# add_subdirectory(tests)
-
-# Now install the DLL and its dependencies as needed
-include(InstallAndPackage)
-
-# Finalize the build process
-include(CTest)
-include(SourceList)
-
+# Install the target
+install(TARGETS openttd
+    RUNTIME DESTINATION bin
+    LIBRARY DESTINATION lib
+    ARCHIVE DESTINATION lib/static
+)
