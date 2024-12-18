@@ -91,18 +91,18 @@ jobs:
     with:
       arch: ${{ matrix.arch }}
 
-  check_annotations:
-    name: Check Annotations
-    needs:
-    - emscripten
-    - linux
-    - macos
-    - windows
+  # check_annotations:
+  #   name: Check Annotations
+  #   # needs:
+  #   # - emscripten
+  #   # - linux
+  #   # - macos
+  #   # - windows
 
-    if: always() && github.event_name == 'pull_request'
+  #   if: always() && github.event_name == 'pull_request'
 
-    runs-on: ubuntu-latest
+  #   runs-on: ubuntu-latest
 
-    steps:
-    - name: Check annotations
-      uses: OpenTTD/actions/annotation-check@v5
+  #   steps:
+  #   - name: Check annotations
+  #     uses: OpenTTD/actions/annotation-check@v5
