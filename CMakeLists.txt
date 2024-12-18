@@ -95,6 +95,8 @@ add_custom_target(find_version
         BYPRODUCTS ${GENERATED_SOURCE_FILES}
 )
 
+include(LinkPackage)
+
 # Include and link external libraries like ZLIB, PNG, etc.
 link_package(ZLIB TARGET ZLIB::ZLIB ENCOURAGED)
 link_package(LIBLZMA TARGET LibLZMA::LibLZMA ENCOURAGED)
