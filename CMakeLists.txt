@@ -9,6 +9,8 @@ project(${BINARY_NAME}
     LANGUAGES CXX
 )
 
+
+
 if(CMAKE_SOURCE_DIR STREQUAL CMAKE_BINARY_DIR)
     message(FATAL_ERROR "In-source builds not allowed. Please run \"cmake ..\" from the build directory. You may need to delete \"${CMAKE_SOURCE_DIR}/CMakeCache.txt\" first.")
 endif()
@@ -86,10 +88,6 @@ if(OPTION_TOOLS_ONLY)
     return()
 endif()
 
-if(APPLE)
-	# Avoid searching for headers in Frameworks, and libraries in LIBDIR.
-	set(CMAKE_FIND_FRAMEWORK LAST)
-endif()
 
 # Prefer -pthread over -lpthread, which is often the better option of the two.
 set(CMAKE_THREAD_PREFER_PTHREAD YES)
@@ -170,9 +168,17 @@ include_directories(${CMAKE_SOURCE_DIR}/src/3rdparty/squirrel/include)
 include(MSVCFilters)
 
 add_library(openttd_lib OBJECT ${GENERATED_SOURCE_FILES})
+add_library(openttd_lib SHARED ${GENERATED_SOURCE_FILES})
+
 add_executable(openttd WIN32)
 add_executable(openttd_test)
+
+add_library(openttd WIN32 SHARED ${GENERATED_SOURCE_FILES})
+
 set_target_properties(openttd PROPERTIES OUTPUT_NAME "${BINARY_NAME}")
+
+
+
 # All other files are added via target_sources()
 
 if(MSVC)
