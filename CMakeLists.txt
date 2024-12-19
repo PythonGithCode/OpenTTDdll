@@ -60,9 +60,9 @@ compile_flags()
 
 
 list(APPEND GENERATED_SOURCE_FILES "${CMAKE_BINARY_DIR}/generated/rev.cpp")
-if(WIN32)
-    list(APPEND GENERATED_SOURCE_FILES "${CMAKE_BINARY_DIR}/generated/ottdres.rc")
-endif()
+
+list(APPEND GENERATED_SOURCE_FILES "${CMAKE_BINARY_DIR}/generated/ottdres.rc")
+
 
 # Generate a target to determine version, which is execute every 'make' run
 add_custom_target(find_version
@@ -99,13 +99,7 @@ find_package(LibLZMA)
 find_package(LZO)
 find_package(PNG)
 
-if(WIN32 OR EMSCRIPTEN)
-    # Windows uses WinHttp for HTTP requests.
-    # Emscripten uses Javascript for HTTP requests.
-else()
-    # All other targets use libcurl.
-    find_package(CURL)
-endif()
+
 
 # Breakpad doesn't support emscripten.
 if(NOT EMSCRIPTEN)
@@ -175,8 +169,12 @@ add_executable(openttd_test)
 
 add_library(openttd SHARED ${GENERATED_SOURCE_FILES})
 
+
 set_target_properties(openttd PROPERTIES OUTPUT_NAME "${BINARY_NAME}")
 
+set_target_properties(openttd PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/Release"
+)
 
 
 # All other files are added via target_sources()
@@ -221,9 +219,7 @@ target_link_libraries(openttd
 )
 
 target_link_libraries(openttd_test PRIVATE openttd_lib)
-if(ANDROID)
-    target_link_libraries(openttd_test PRIVATE log)
-endif()
+
 
 include(Catch)
 catch_discover_tests(openttd_test)
@@ -301,24 +297,24 @@ link_package(SSE)
 
 add_definitions_based_on_options()
 
-if(WIN32)
-    add_definitions(
-        -DUNICODE
-        -D_UNICODE
-        -DWITH_UNISCRIBE
-        -DPSAPI_VERSION=1
-    )
 
-    target_link_libraries(openttd_lib
-        ws2_32
-        winmm
-        imm32
-        usp10
-        psapi
-        winhttp
-        bcrypt
-    )
-endif()
+add_definitions(
+    -DUNICODE
+    -D_UNICODE
+    -DWITH_UNISCRIBE
+    -DPSAPI_VERSION=1
+)
+
+target_link_libraries(openttd_lib
+    ws2_32
+    winmm
+    imm32
+    usp10
+    psapi
+    winhttp
+    bcrypt
+)
+
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)
     add_definitions(-DPOINTER_IS_64BIT)
@@ -328,8 +324,8 @@ enable_testing()
 
 add_subdirectory(regression)
 
-if(APPLE OR WIN32)
-    find_package(Pandoc)
-endif()
+find_package(Pandoc)
+    
 
-include(InstallAndPackage)
+
+# include(InstallAndPackage)
