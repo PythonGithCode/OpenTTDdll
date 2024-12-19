@@ -66,6 +66,7 @@ jobs:
         cd build
 
         echo "::group::CMake"
+        cmake -B build -S . -A x64
         cmake .. \
           -GNinja \
           -DVCPKG_TARGET_TRIPLET=${{ inputs.arch }}-windows-static \
@@ -77,8 +78,23 @@ jobs:
         echo "::endgroup::"
 
         echo "::group::Build"
-        cmake --build . --config Release
+        cmake cmake --build build --config Release --target openttd # --build . # --config Release
         echo "::endgroup::"
+
+
+    - name: Check3 for app.cpp
+      run: |
+        Get-ChildItem -Recurse -Force
+
+
+
+    # # Configure the project with CMake
+    # - name: Configure with CMake
+    #   run: cmake -B build -S . -A x64
+
+    # Build the DLL using CMake
+   # - name: Build DLL
+    #  run: cmake --build build --config Release --target openttd
 
 
     - name: Upload DLL as artifact
