@@ -170,7 +170,7 @@ include(MSVCFilters)
 add_library(openttd_lib OBJECT ${GENERATED_SOURCE_FILES})
 # add_library(openttd_lib SHARED ${GENERATED_SOURCE_FILES})
 
-add_executable(openttd WIN32)
+# add_executable(openttd WIN32)
 add_executable(openttd_test)
 
 add_library(openttd WIN32 SHARED ${GENERATED_SOURCE_FILES})
