@@ -67,7 +67,8 @@ jobs:
 
         echo "::group::CMake"
         echo "TESTSSSS_12f"
-        cmake -B build -S . -A x64
+        # cmake -B build -S . -A x64
+        echo "TESTSSSS_13f"
         cmake .. \
           -GNinja \
           -DVCPKG_TARGET_TRIPLET=${{ inputs.arch }}-windows-static \
@@ -77,9 +78,12 @@ jobs:
           -DBUILD_SHARED_LIBS=ON  # Ensure we're building a shared library (DLL)
           # EOF
         echo "::endgroup::"
+        echo "TESTSSSS_14f"
 
         echo "::group::Build"
+        echo "TESTSSSS_15f"
         cmake --build build --config Release --target openttd 
+        echo "TESTSSSS_16f"
         echo "::endgroup::"
 
 
