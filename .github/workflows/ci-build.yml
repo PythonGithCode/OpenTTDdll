@@ -13,7 +13,11 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
-# jobs:
+jobs:
+  msbuild:
+    name: msbuild
+
+    uses:  ./.github/workflows/msbuild.yml
   
   # emscripten:
   #   name: Emscripten
