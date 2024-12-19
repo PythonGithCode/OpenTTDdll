@@ -13,7 +13,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.ref != 'refs/heads/master' }}
 
-jobs:
+# jobs:
+  
   # emscripten:
   #   name: Emscripten
 
@@ -75,21 +76,21 @@ jobs:
   #     full_arch: ${{ matrix.full_arch }}
   #     extra-cmake-parameters: ${{ matrix.extra-cmake-parameters }}
 
-  windows:
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-        # - arch: x86
-        - arch: x64
+  # windows:
+  #   strategy:
+  #     fail-fast: false
+  #     matrix:
+  #       include:
+  #       # - arch: x86
+  #       - arch: x64
 
-    name: Windows (${{ matrix.arch }})
+  #   name: Windows (${{ matrix.arch }})
 
-    uses: ./.github/workflows/ci-windows.yml
-    secrets: inherit
+  #   uses: ./.github/workflows/ci-windows.yml
+  #   secrets: inherit
 
-    with:
-      arch: ${{ matrix.arch }}
+  #   with:
+  #     arch: ${{ matrix.arch }}
 
   # check_annotations:
   #   name: Check Annotations
