@@ -173,7 +173,7 @@ add_library(openttd_lib OBJECT ${GENERATED_SOURCE_FILES})
 # add_executable(openttd WIN32)
 add_executable(openttd_test)
 
-add_library(openttd WIN32 SHARED ${GENERATED_SOURCE_FILES})
+add_library(openttd SHARED ${GENERATED_SOURCE_FILES})
 
 set_target_properties(openttd PROPERTIES OUTPUT_NAME "${BINARY_NAME}")
 
