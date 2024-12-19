@@ -57,6 +57,19 @@ jobs:
       with:
         arch: ${{ inputs.arch }}
 
+     # Configure the project with CMake
+    - name: Configure with CMake
+      run: cmake -B build -S . -A x64
+    
+    #Build the DLL using CMake
+    - name: Build DLL
+      run: cmake --build build --config Release --target openttd
+    
+    - name: Check3 for app.cpp
+      run: |
+        Get-ChildItem -Recurse -Force
+
+
     - name: Build
       shell: bash
       env:
