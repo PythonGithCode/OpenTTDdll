@@ -10,14 +10,14 @@
 #ifndef REV_H
 #define REV_H
 
- const char _openttd_revision[];
- const char _openttd_build_date[];
- const char _openttd_revision_hash[];
- const char _openttd_revision_year[];
- const uint8_t _openttd_revision_modified;
- const uint8_t _openttd_revision_tagged;
- const char _openttd_content_version[];
- const uint32_t _openttd_newgrf_version;
+extern "c" const char _openttd_revision[];
+extern "c" const char _openttd_build_date[];
+extern "c" const char _openttd_revision_hash[];
+extern "c" const char _openttd_revision_year[];
+extern "c" const uint8_t _openttd_revision_modified;
+extern "c" const uint8_t _openttd_revision_tagged;
+extern "c" const char _openttd_content_version[];
+extern "c" const uint32_t _openttd_newgrf_version;
 
 bool IsReleasedVersion();
 
