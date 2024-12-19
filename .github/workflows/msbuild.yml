@@ -1,0 +1,78 @@
+
+name: Build and Upload DLL
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+            
+    
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+
+
+
+
+
+      # Use vswhere to find Visual Studio and set up MSVC
+      - name: Set up MSVC
+        run: |
+          # Find the path to MSVC using vswhere
+          $vsInstallPath = &"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          echo "Found Visual Studio at: $vsInstallPath"
+          # Set up the environment for Visual Studio
+          &"$vsInstallPath\Common7\Tools\VsDevCmd.bat" -arch=amd64
+
+      - name: Checkc for mycode.cpp
+        run: |
+          Get-ChildItem -Recurse -Force
+
+
+      # Install CMake (if not already installed)
+      - name: Install CMake
+        uses: jwlawson/actions-setup-cmake@v1
+      
+      - name: Check available Visual Studio versions
+        run: |
+          &"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -all
+
+      - name: Check3 for mycode.cpp
+        run: |
+          Get-ChildItem -Recurse -Force
+
+
+
+      # Configure the project with CMake
+      - name: Configure with CMake
+        run: cmake -B build -S . -A x64
+
+      # Build the DLL using CMake
+      - name: Build DLL
+        run: cmake --build build --config Release --target MyCppProject
+
+      - name: Check for mycode.cpp
+        run: |
+          Get-ChildItem -Recurse -Force
+
+
+      # Upload the DLL as an artifact
+      - name: Upload DLL artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: compiled-dll
+          path: D:/a/pk/pk/build/Release/Release/MyCppProject.dll
+
+      - name: Check for mycode.cpp
+        run: |
+          Get-ChildItem -Recurse -Force
