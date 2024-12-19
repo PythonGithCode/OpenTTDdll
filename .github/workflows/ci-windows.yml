@@ -82,7 +82,7 @@ jobs:
 
         echo "::group::Build"
         echo "TESTSSSS_15f"
-        cmake --build build --config Release --target openttd 
+        cmake --build . --config Release --target openttd 
         echo "TESTSSSS_16f"
         echo "::endgroup::"
 
