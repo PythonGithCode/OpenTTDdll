@@ -55,19 +55,19 @@ jobs:
 
       # Build the DLL using CMake
       - name: Build DLL
-        run: cmake --build build --config Release --target MyCppProject
+        run: cmake --build build --config Release --target openttd
 
       - name: Check for mycode.cpp
         run: |
           Get-ChildItem -Recurse -Force
-
-
+            
+              
       # Upload the DLL as an artifact
-      - name: Upload DLL artifact
+      - name: Upload DLL as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: compiled-dll
-          path: D:/a/pk/pk/build/Release/Release/MyCppProject.dll
+            name: my-dll-artifact
+            path: build/*.dll
 
       - name: Check for mycode.cpp
         run: |
